@@ -1,13 +1,14 @@
 ---
 layout: post
 title:  "Compiling in-tree kernel modules for Kali Linux"
-date:   2021-11-21 18:21:11 +0100
+date:   2021-12-11 18:21:11 +0100
 categories: linux kali
-image: /assets/test.png
 ---
+![Header Image](/assets/images/2021_11_21-kdebug-gef-crop.png)
+
 My company uses the ETAS ES582.1 CAN adapters to interface with a CAN bus. Since recently, the kernel has mainline support for these devices (the *etas_es58x* driver). However, my work operating system of choice, Kali Linux, does not ship with a prebuilt kernel module for the devices out of the box. Hence, I needed to manually compile the module to use the devices under Linux. While doing so, I ran into binary compatibility issues and ended up debugging the module loading process with QEMU to determine the root cause. This blog post is a summary of the short journey. I first explain the QEMU VM installation process, explain the issues I encountered, and outline the debugging process to pinpoint the issue.
 
-Spoiler: I you arrived at this post in hopes of fixing the error message below, try installing the `pahole` tool. On Kali, the required package is called `dwarves`. If that doesn't work, I invite you to follow this post and try this out for yourself.
+Spoiler: If you arrived at this post in hopes of fixing the error message below, try installing the `pahole` tool. On Kali, the required package is called `dwarves`. If that doesn't work, I invite you to follow this post and try debugging for yourself.
 
 On the host, I used an Arch Linux installation. The QEMU VM ran the target operating system, a Kali Linux installation. All my attempts were made on Kernel version *5.14.16*.
 
@@ -452,4 +453,4 @@ crc16                  16384  2 etas_es58x,ext4
 The module was happy and alive.
 
 ## Takeaway Message
-When compiling a kernel module: always make sure that the configuration file doesn't change while you're not looking. This scenario wasn't something I was aware of until now. And frankly, I do not consider it to be good design. I believe a missing dependency should cause a build to fail fast, not produce incompatible artifacts.
+When compiling a kernel module: always make sure that the configuration file doesn't change while you're not looking. This scenario wasn't something I was aware of until now. And frankly, I do not consider it to be good design. Of course I don't have the entire picture, but I believe a missing dependency should cause a build to fail fast, not produce incompatible artifacts.
