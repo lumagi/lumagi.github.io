@@ -1,5 +1,5 @@
 ---
-title:  "Compiling in-tree kernel modules for Kali Linux"
+title:  "Debugging Linux Module Loading with QEMU"
 date:   2021-12-11 18:21:11 +0100
 categories: [Linux, Kernel]
 tags: [Linux, Kernel, QEMU, Debugging]
