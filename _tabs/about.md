@@ -4,5 +4,4 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-{: .prompt-tip }
+This Jekyll blog site shall serve as a scratchpad for random pieces of wisdom I collect throughout my tech endeavors. They are potentially related to pentesting and reverse engineering. I share these bits in hopes that they might be useful to others.
