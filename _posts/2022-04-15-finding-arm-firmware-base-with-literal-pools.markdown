@@ -40,7 +40,7 @@ Since these literal pools use absolute addresses, they can potentially disclose 
 
 ## Algorithm Concept
 
-For our scenario, we assue to have been given a binary firmware blob that runs on a 32bit ARM chip and operates on string literals, meaning that it accesses string constants in the `.rodata` section. We don't know at which address the firmware is loaded into memory. This makes firmware analysis more complicated because code jumps, variables or strings that rely on absolute addressing cannot be resolved if the firmware is placed at an incorrect location. Hence, the goal of this algorithm is to determine the absolute address at which the firmware image is supposed to be loaded into memory.
+For our scenario, we assume to have been given a binary firmware blob that runs on a 32bit ARM chip and operates on string literals, meaning that it accesses string constants in the `.rodata` section. We don't know at which address the firmware is loaded into memory. This makes firmware analysis more complicated because code jumps, variables or strings that rely on absolute addressing cannot be resolved if the firmware is placed at an incorrect location. Hence, the goal of this algorithm is to determine the absolute address at which the firmware image is supposed to be loaded into memory.
 
 ### Prerequisites
 
@@ -54,7 +54,7 @@ Although I list these steps as prerequisite, identifying the literal pool addres
 
 Since the compiler always creates literal pools for code that accesses string constants, we can assume that some of the literal pool addresses we identified in the last step must point to the string literals that we found. We can now try out different base addresses and determine the number of literal pool addresses that correctly link up with the identified string constants. The base address that maximizes this function can be considered the correct base address (given that we have correctly selected our candidate base addresses).
 
-This algorithm turns our search into an optimization problem. The advantage of this is that we do not need to find all strings or all literal pools. As long as we find a sufficient number of samples, we can be sure that our algorithm will converge. However, it can also be considered somewhat of a brute-force method, and we need to be smart about what addresses we consider as possible load locations for the firmware. If we select an address range that is too broad, the algorithm will likely not terminate. Fortunately, the non-volatile memory of most embedded chips is rather small compared to the 32 bit address space. Additionally, we can assume the firmware addresses to be aligned to 0x4 or possibly 0x10 to further narrow down the search space.
+This algorithm turns our search into an optimization problem. The advantage of this is that we do not need to find all strings or all literal pools. As long as we find a sufficient number of samples, we can be sure that our algorithm will converge. However, it can also be considered somewhat of a brute-force method, and we need to be smart about what addresses we consider as possible load locations for the firmware. If we select an address range that is too broad, the algorithm will likely not terminate. Fortunately, the non-volatile memory of most embedded chips is rather small compared to the 32 bit address space. Additionally, we can assume the firmware addresses to be aligned to 0x4 or possibly even 0x10 boundaries to further narrow down the search space.
 
 ## Algorithm Implementation
 
@@ -96,7 +96,7 @@ The second step is to locate literal pools in the firmware image. This step is b
 
 The search assumes that a literal pool consists of multiple entries. All entries in such a pool must point to a certain region in address space. This is a valid assumption to make since we know the chip and its address mapping. If the firmware is loaded directly from the memory-mapped internal or external flash of the chip, the literal pools must point there. And since the size of most flash banks is rather limited, the valid address range is likely rather small. Consequently, we can assume a candidate pool to be valid if all addresses contained in it point to our target memory region.
 
-The algorithm uses a dynamically-sized window that is moved across the entire firmware image. With every iteration, the algorithm checks if all values inside the window can be interpreted as absolute addresses pointing into a certain address range. If that is the case, the region is assumed to be a literal pool and the window size is increased until the check fails. All addresses are then added to a buffer, and the window is reset and moved to the next position. Below, Below, I list the complete function:
+The algorithm uses a dynamically-sized window that is moved across the entire firmware image. With every iteration, the algorithm checks if all values inside the window can be interpreted as absolute addresses pointing into a certain address range. If that is the case, the region is assumed to be a literal pool and the window size is increased until the check fails. All addresses are then added to a buffer, and the window is reset and moved to the next position. Below, I list the complete function:
 
 ```python
 def find_address_pools(data: bytes, target_range: Tuple[int, int], win_size: int = WIN_SIZE) -> List[int]:
