@@ -15,14 +15,14 @@ The Device ID is called CAN Channel ID in the kernel to reduce the disambiguity 
 
 Given a PCAN device as can0:
 ```bash
-ethtool -e /sys/class/net/can0
+ethtool -e can0
 ```
 
 ## Writing
 
 Given a PCAN device as can0:
 ```bash
-ethtool -E /sys/class/net/can0 <TBA>
+echo "00 11 22 33" | xxd -r -p | ethtool -E can0
 ```
 
 # udev Support
@@ -36,5 +36,5 @@ ls -l /sys/class/net/can0/peak_usb/can_channel_id
 The file exports the Device ID attribute as a hex-encoded, little-endian 32 bit integer. The value is read-only, i.e. it can only be set via ethtool. A rule can be written as follows:
 
 ```
-TBA
+SUBSYSTEM=="net", ACTION=="add", KERNEL=="can*", ATTR{peak_usb/can_channel_id}=="00112233", NAME="mycan"
 ```
