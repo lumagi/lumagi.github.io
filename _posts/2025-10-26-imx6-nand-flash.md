@@ -1,12 +1,17 @@
 ---
 title:  "Decoding raw i.MX6 NAND flash images"
-date:   2025-10-26 18:21:00 +0100
+date:   2025-12-29 18:21:00 +0100
 categories: [Embedded]
 tags: [NAND, Flash, i.MX6, BCH]
 math: true
 ---
 
-I was recently working with a PCB featuring an i.MX6 SoC and a raw NAND flash chip. The SoC was running a u-boot and an embedded Linux off of the NAND flash chip. Since the debug port was properly locked, I wanted to take a look at the embedded u-boot and Linux. I decided to desolder and dump the flash chip. This post documents how the i.MX6 stores user data on an external NAND flash and how this user data can be manually extracted while correcting bit errors.
+I was recently working with a PCB featuring an i.MX6 SoC and a raw NAND flash chip. The SoC was running a u-boot off of a NOR flash and subsequently an embedded Linux off of the NAND flash chip. Since the debug port was properly locked, I wanted to take a look at the embedded u-boot and the Linux. I decided to desolder and dump the flash chip. This post documents how the i.MX6 stores user data on an external NAND flash and how this user data can be manually extracted while correcting bit errors.
+
+## Related Work
+
+There is an interesting [slideset](https://conference.hitb.org/hitbsecconf2019ams/materials/D1T3%20-%20How%20to%20Dump,%20Parse,%20and%20Analyze%20i.MX%20Flash%20Memory%20Chips%20-%20Damien%20Cauquil.pdf) and a corresponding [GitHub repository](https://github.com/DigitalSecurity/imx-nand-tools) by DigitalSecurity that describe how to parse raw NAND flash images produced by i.MX SoCs.
+The tool relies on the Firmware Configuration Block (FCB), which is a data structure stored at a specific location in NAND flash. It is used by the i.MX6 boot ROM to bootstrap the required NAND configuration. The bootstrapping is necessary if a boot should occur directly from the NAND flash. In my scenario, the i.MX6 did not directly boot from the NAND flash, instead the boot ROM first loaded the u-boot from the SPI NOR flash. The NAND flash was initialized by u-boot, so no FCB was present. As a consequence, I couldn't directly use their tooling to decode the dump.
 
 ## NAND Flash Memory
 
@@ -50,7 +55,6 @@ The flash memory page has this extra capacity for correction information, but ho
 In my scenario, the i.MX6 was acting as the host or flash controller. It also handled the page as a contiguous region of memory.
 
 ### Dumping the flash
-
 
 The Glasgow applet worked right out of the box, and I was able to dump the memory successfully. The applet offers you the option of separating the regular area and spare area of the flash pages into separate files. Although this first sounded like a good idea, I later noticed that the flash controller did not make any distinction between the two. It treated the flash page as a contiguous region of 2112 bytes, so dumping them interleaved was the right choice.
 
